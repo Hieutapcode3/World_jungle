@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using Hyb.Utils;
 
-public class BtnManager : MonoBehaviour
+public class BtnManager : ManualSingletonMono<BtnManager>
 {
-    [SerializeField] private List<Transform> charactors;
-    private List<Vector3> initialPositions;
-    private bool canChange = true; 
+    [SerializeField] private List<Transform>    charactors; 
+    [SerializeField] private GameObject         changeBtn;       
+    private List<Vector3>                       initialPositions;             
+    private bool                                canChange = true;                     
 
     void Start()
     {
@@ -15,6 +17,22 @@ public class BtnManager : MonoBehaviour
         foreach (Transform charactor in charactors)
         {
             initialPositions.Add(charactor.position);
+        }
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0)) 
+        {
+            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+            if (hit.collider != null)
+            {
+                if (hit.collider.gameObject == changeBtn)
+                {
+                    ChangePosCharactors();
+                }
+            }
         }
     }
 

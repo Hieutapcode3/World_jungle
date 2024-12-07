@@ -1,18 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class CharactorController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    [SerializeField] private char _char; 
+    private TextMeshPro _txt;
+
     void Start()
     {
-        
+        _txt = GetComponent<TextMeshPro>();
+        _char = _txt.text[0];
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnMouseDown()
     {
-        
+        Debug.Log("Mouse Down on: " + _char);
+        CharactorManager.Instance.StartTracking(_char, transform); 
+    }
+
+    private void OnMouseEnter()
+    {
+        if (CharactorManager.Instance.IsTracking)
+        {
+            CharactorManager.Instance.AddChar(_char, transform); 
+        }
+    }
+
+    private void OnMouseUp()
+    {
+        Debug.Log("Mouse Up on: " + _char);
+        CharactorManager.Instance.EndTracking();
     }
 }

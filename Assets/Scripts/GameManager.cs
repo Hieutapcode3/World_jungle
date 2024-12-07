@@ -64,6 +64,16 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene(nextSceneIndex);
         }
     }
+    public void BackScene()
+    {
+        // AudioManager.Instance.PlayBackgroundMusic();
+        int previousScence = SceneManager.GetActiveScene().buildIndex - 1;
+        if (previousScence >= 0)
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(previousScence);
+        }
+    }
     public void ReloadScene(){
         Time.timeScale = 1;
         // AudioManager.Instance.PlayBackgroundMusic();
@@ -87,9 +97,12 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1;
     }
+    public void Success(){
+        StartCoroutine(ActiveSuccessPanel());
+    }
     public IEnumerator ActiveSuccessPanel(){
         // AudioManager.Instance.PlayAudioSuccess();
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
         sucessPanel.SetActive(true);
         Time.timeScale =0;
     }
