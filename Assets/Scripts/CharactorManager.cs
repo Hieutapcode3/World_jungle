@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CharactorManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class CharactorManager : MonoBehaviour
     [SerializeField] private TextMeshPro myWord; 
     public static CharactorManager Instance { get; private set; } 
     private int correctWordAmount = 0;
+    public bool canSelectBox;
 
     [System.Serializable]
     public class KeyWord
@@ -45,8 +47,12 @@ public class CharactorManager : MonoBehaviour
                 {
                     charactor.SetActive(false);
                 }
-                
             }
+        }
+    }
+    private void Update() {
+        if(Input.GetKeyDown(KeyCode.Space)){
+            ActivateRandomCharactor();
         }
     }
     public void StartTracking(char startChar, Transform startPosition)
@@ -103,15 +109,13 @@ public class CharactorManager : MonoBehaviour
         {
             if (myWord.text == keyword._keyWord)
             {
+                StartCoroutine(CharactorEffectWord(keyword));
                 if(!keyword.isAvailable){
                     keyword.isAvailable = true;
-                    foreach (GameObject charactor in keyword.charatorOfKeyWord)
-                    {
-                        charactor.SetActive(true);
-                    }
                     correctWordAmount++;
                     if(correctWordAmount == keyWords.Count){
                         GameManager.Instance.Success();
+                        // LevelManager.Instance.UnlockNextLevel();
                     }
                 }
             }
@@ -139,23 +143,95 @@ public class CharactorManager : MonoBehaviour
     }
     private IEnumerator CorrectEffect(Transform answer)
     {
-    TextMeshPro yourAnswer = answer.GetComponent<TextMeshPro>();
-    yourAnswer.color = Color.green;
-    Transform originPos = yourAnswer.transform;
-    for (int i = 0; i < yourAnswer.text.Length; i++)
+        TextMeshPro yourAnswer = answer.GetComponent<TextMeshPro>();
+        yourAnswer.color = Color.green;
+        Vector3 originalPosition = answer.position;
+        yield return new WaitForSeconds(0.1f);
+        answer.DOMove(originalPosition - Vector3.up, 0.25f).SetEase(Ease.InOutQuad);
+        yield return new WaitForSeconds(0.25f);
+        answer.position = originalPosition;
+        yourAnswer.text = "";
+        yourAnswer.color = Color.black;
+    }
+
+    private IEnumerator CharactorEffectWord(KeyWord keyWord){
+        foreach (GameObject charactor in keyWord.charatorOfKeyWord){
+            charactor.transform.localScale = Vector3.zero;
+            charactor.SetActive(true);
+            TextMeshPro _color = charactor.GetComponent<TextMeshPro>();
+            _color.color = Color.green;
+            charactor.transform.DOScale(1.5f,0.1f).SetEase(Ease.InOutQuad);
+            yield return new WaitForSeconds(0.15f);
+            charactor.transform.DOScale(1f,0.1f).SetEase(Ease.InOutQuad);
+            yield return new WaitForSeconds(0.15f);
+            _color.color = Color.black;
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+    public void ActivateRandomCharactor()
     {
-        string charToMove = yourAnswer.text[i].ToString();
-        GameObject charObj = new GameObject("Character");
-        TextMeshPro charText = charObj.AddComponent<TextMeshPro>();
-        charText.text = charToMove;
-        charText.fontSize = yourAnswer.fontSize;  
-        charText.color = yourAnswer.color;        
-        charObj.transform.position = originPos.position + new Vector3(i * 0.2f, 0, 0);  
-        charText.transform.DOMoveY(originPos.position.y - 1f, 0.5f).SetEase(Ease.OutBounce);
-        yield return new WaitForSeconds(0.5f);
+        List<GameObject> inactiveCharactors = new List<GameObject>();
+        foreach (KeyWord keyword in keyWords)
+        {
+            foreach (GameObject charactor in keyword.charatorOfKeyWord)
+            {
+                if (!charactor.activeSelf)
+                {
+                    inactiveCharactors.Add(charactor);
+                }
+            }
+        }
+        if (inactiveCharactors.Count > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, inactiveCharactors.Count);
+            GameObject selectedCharactor = inactiveCharactors[randomIndex];
+            StartCoroutine(CharactorEffect(selectedCharactor));
+            CheckWordCompletion();
+        }
     }
-    yourAnswer.text = "";
-    yourAnswer.color = Color.black;
+
+    public void ActivateSelectedCharactor(GameObject selectedCharactor)
+    {
+        StartCoroutine(CharactorEffect(selectedCharactor));
+        CheckWordCompletion();
     }
+    private IEnumerator CharactorEffect(GameObject selectedCharactor){
+            selectedCharactor.transform.localScale = Vector3.zero;
+            selectedCharactor.SetActive(true);
+            TextMeshPro _color = selectedCharactor.GetComponent<TextMeshPro>();
+            _color.color = Color.green;
+            selectedCharactor.transform.DOScale(1.5f,0.1f).SetEase(Ease.InOutQuad);
+            yield return new WaitForSeconds(0.1f);
+            selectedCharactor.transform.DOScale(1f,0.1f).SetEase(Ease.InOutQuad);
+            yield return new WaitForSeconds(0.1f);
+            _color.color = Color.black;
+    }
+    private void CheckWordCompletion()
+    {
+        foreach (KeyWord keyword in keyWords)
+        {
+            if (keyword.isAvailable) continue;
+            bool isComplete = true;
+            foreach (GameObject charactor in keyword.charatorOfKeyWord)
+            {
+                if (!charactor.activeSelf)
+                {
+                    isComplete = false;
+                    break;
+                }
+            }
+            if (isComplete)
+            {
+                keyword.isAvailable = true;
+                correctWordAmount++;
+                StartCoroutine(CharactorEffectWord(keyword));
+                if (correctWordAmount == keyWords.Count)
+                {
+                    GameManager.Instance.Success();
+                }
+            }
+        }
+    }
+
 
 }

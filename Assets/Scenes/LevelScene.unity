@@ -1675,6 +1675,73 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1021489806}
   m_CullTransparentMesh: 1
+--- !u!1 &1060855660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1060855662}
+  - component: {fileID: 1060855661}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1060855661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060855660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36c9af9423cd58e48a061f627f2e0855, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levelBtn:
+  - {fileID: 525198592}
+  - {fileID: 1855640887}
+  - {fileID: 1633335660}
+  - {fileID: 1765077308}
+  - {fileID: 15951550}
+  - {fileID: 1583028633}
+  - {fileID: 2038974132}
+  - {fileID: 375594032}
+  - {fileID: 1083773306}
+  - {fileID: 2101015104}
+  - {fileID: 1747040933}
+  - {fileID: 1173978512}
+  - {fileID: 1477668858}
+  - {fileID: 2044599959}
+  - {fileID: 277675547}
+  - {fileID: 1412862771}
+  - {fileID: 1518003271}
+  - {fileID: 1127850863}
+  - {fileID: 1561188897}
+  - {fileID: 1162162361}
+  lockedSprite: {fileID: 21300000, guid: 74d9b06f8b2874542be934a8f41d9ee0, type: 3}
+  unlockedSprite: {fileID: 21300000, guid: 0354a2ea922f7ea408cb9980e1208715, type: 3}
+--- !u!4 &1060855662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060855660}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 535.58453, y: 1242.6158, z: 15121.691}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1083773304
 GameObject:
   m_ObjectHideFlags: 0
@@ -1829,7 +1896,21 @@ MonoBehaviour:
   _muteImg: {fileID: 0}
   isMuted: 0
   isStart: 0
+  _bgIndexTxt: {fileID: 1514373694}
+  _previousBtn: {fileID: 0}
+  _nextBtn: {fileID: 0}
   _musicButtons: []
+  _bgButtons: []
+  BackgroundSprites:
+  - {fileID: 21300000, guid: a0348bfdb76dba14fadb4eedd821a4f5, type: 3}
+  - {fileID: 21300000, guid: 676a2acc9a7bc11459df792f310805e0, type: 3}
+  - {fileID: 21300000, guid: 197ba864ee58504499dca8f74e958117, type: 3}
+  - {fileID: 21300000, guid: 043b171853c35504f9b7b5d4c17043de, type: 3}
+  - {fileID: 21300000, guid: a635d70d0eae60f418468609e7d003d3, type: 3}
+  - {fileID: 21300000, guid: 7b88b25dda27c48428c148f01c5712a7, type: 3}
+  - {fileID: 21300000, guid: f22ce30f333f75b47976a6dd7fb14f56, type: 3}
+  backgroundPanel:
+  - {fileID: 1478015167}
   sucessPanel: {fileID: 0}
   losePanel: {fileID: 0}
   winGamePanel: {fileID: 0}
@@ -2736,7 +2817,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.020216942, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4813,3 +4894,4 @@ SceneRoots:
   - {fileID: 1947014670}
   - {fileID: 761981663}
   - {fileID: 1108963565}
+  - {fileID: 1060855662}
