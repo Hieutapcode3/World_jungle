@@ -10,7 +10,6 @@ public class BtnManager : ManualSingletonMono<BtnManager>
     [SerializeField] private GameObject         changeBtn;       
     private List<Vector3>                       initialPositions;             
     private bool                                canChange = true;                     
-
     void Start()
     {
         initialPositions = new List<Vector3>();
@@ -28,7 +27,7 @@ public class BtnManager : ManualSingletonMono<BtnManager>
             RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
             if (hit.collider != null)
             {
-                if (hit.collider.gameObject == changeBtn)
+                if (hit.collider.gameObject == changeBtn && GameManager.Instance.canSelectChar)
                 {
                     ChangePosCharactors();
                 }

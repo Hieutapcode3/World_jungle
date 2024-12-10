@@ -10,12 +10,15 @@ public class CharactorManager : MonoBehaviour
 {
     private List<char> currentChars = new List<char>(); 
     private List<Transform> charPositions = new List<Transform>(); 
+    private List<CharactorController> charControllers = new List<CharactorController>();
     private bool isTracking = false; 
     public bool IsTracking => isTracking;
     [SerializeField] private TextMeshPro myWord; 
+    private Vector3 originPosMyWord;
     public static CharactorManager Instance { get; private set; } 
     private int correctWordAmount = 0;
     public bool canSelectBox;
+    [SerializeField] private List<WordBoxCheck> wordBoxs;
 
     [System.Serializable]
     public class KeyWord
@@ -25,6 +28,7 @@ public class CharactorManager : MonoBehaviour
         public bool isAvailable = false;
     }
     public List<KeyWord> keyWords;
+    [SerializeField] private RopeEffect ropeEffect;
 
     void Awake()
     {
@@ -39,6 +43,7 @@ public class CharactorManager : MonoBehaviour
         if (myWord != null)
         {
             myWord.text = "";
+            originPosMyWord = myWord.transform.position;
         }
         if(keyWords.Count != 0){
             foreach (KeyWord keyword in keyWords)
@@ -50,42 +55,60 @@ public class CharactorManager : MonoBehaviour
             }
         }
     }
-    private void Update() {
-        if(Input.GetKeyDown(KeyCode.Space)){
-            ActivateRandomCharactor();
-        }
-    }
+
     public void StartTracking(char startChar, Transform startPosition)
     {
         isTracking = true;
         currentChars.Clear();
         charPositions.Clear();
+        charControllers.Clear();
+
         currentChars.Add(startChar);
         charPositions.Add(startPosition);
+        charControllers.Add(startPosition.GetComponent<CharactorController>()); 
+
         UpdateWord();
+        UpdateLineRenderer();
     }
 
     public void AddChar(char nextChar, Transform nextPosition)
     {
         if (!isTracking) return;
+
         if (charPositions.Count > 1 && nextPosition == charPositions[charPositions.Count - 2])
         {
-            currentChars.RemoveAt(currentChars.Count - 1);
-            charPositions.RemoveAt(charPositions.Count - 1);
+            int lastIndex = charPositions.Count - 1;
+            charControllers[lastIndex].transform.GetChild(0).gameObject.SetActive(false);
+            charControllers.RemoveAt(lastIndex);
+
+            currentChars.RemoveAt(lastIndex);
+            charPositions.RemoveAt(lastIndex);
         }
         else if (!charPositions.Contains(nextPosition))
         {
             currentChars.Add(nextChar);
             charPositions.Add(nextPosition);
+            charControllers.Add(nextPosition.GetComponent<CharactorController>()); // Lấy CharactorController.
+            nextPosition.GetChild(0).gameObject.SetActive(true);
         }
 
         UpdateWord();
+        UpdateLineRenderer();
     }
 
     public void EndTracking()
     {
         isTracking = false;
+        foreach (var controller in charControllers)
+        {
+            controller.transform.GetChild(0).gameObject.SetActive(false);
+        }
+        ropeEffect.ClearLineRenderer();
         CheckAndActivateKeywords();
+    }
+    private void UpdateLineRenderer()
+    {
+        ropeEffect.SetControlPoints(charPositions);
     }
 
     private void UpdateWord()
@@ -139,6 +162,7 @@ public class CharactorManager : MonoBehaviour
         yield return new WaitForSeconds(.05f);
         yourAnswer.text = "";
         yourAnswer.color = Color.black;
+        answer.position = originPosMyWord;
 
     }
     private IEnumerator CorrectEffect(Transform answer)
@@ -149,7 +173,7 @@ public class CharactorManager : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         answer.DOMove(originalPosition - Vector3.up, 0.25f).SetEase(Ease.InOutQuad);
         yield return new WaitForSeconds(0.25f);
-        answer.position = originalPosition;
+        answer.position = originPosMyWord;
         yourAnswer.text = "";
         yourAnswer.color = Color.black;
     }
@@ -188,7 +212,24 @@ public class CharactorManager : MonoBehaviour
             StartCoroutine(CharactorEffect(selectedCharactor));
             CheckWordCompletion();
         }
+        GameManager.Instance.DecreaseCoin(100);
+        GameManager.Instance.canSelectChar = true;
     }
+    public void ActiveSelectEffect(){
+        if(wordBoxs.Count !=0){
+            foreach(WordBoxCheck box in wordBoxs){
+                box.ActiveEfftect();
+            }
+        }
+    }
+    public void UnActiveSelectEffect(){
+        if(wordBoxs.Count !=0){
+            foreach(WordBoxCheck box in wordBoxs){
+                box.EndEffect();
+            }
+        }
+    }
+    
 
     public void ActivateSelectedCharactor(GameObject selectedCharactor)
     {
@@ -230,6 +271,11 @@ public class CharactorManager : MonoBehaviour
                     GameManager.Instance.Success();
                 }
             }
+        }
+    }
+    public void UnActiveWordBox(){
+        foreach(WordBoxCheck box in wordBoxs){
+            box.gameObject.SetActive(false);
         }
     }
 

@@ -6,21 +6,30 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private Sprite _musicImg;
-    [SerializeField] private Sprite _muteImg;
-    public bool isMuted;
-    public bool isStart = false;
-    [SerializeField] private Text _bgIndexTxt;
-    private int _indexBgTxt = 1;
-    [SerializeField] private List<Button> _musicButtons; 
-    [SerializeField] private List<Button> _bgButtons; 
-    [SerializeField] private List<Sprite> BackgroundSprites; 
-    [SerializeField] private List<Image> backgroundPanel; 
-    [SerializeField] private GameObject sucessPanel;
-    [SerializeField] private GameObject losePanel;
-    [SerializeField] private GameObject winGamePanel;
-    private const string SelectedButtonKey = "SelectedButtonIndex"; 
-    public static GameManager Instance;
+    [SerializeField] private Sprite             _musicImg;
+    [SerializeField] private Sprite             _muteImg;
+    public bool                                 isMuted;
+    public bool                                 isStart = false;
+    [SerializeField] private Text               _bgIndexTxt;
+    private int                                 _indexBgTxt = 1;
+    [SerializeField] private List<Button>       _musicButtons; 
+    [SerializeField] private List<Button>       _bgButtons; 
+    [SerializeField] private List<Sprite>       BackgroundSprites; 
+    [SerializeField] private List<Image>        backgroundPanel; 
+    [SerializeField] private GameObject         sucessPanel;
+    [SerializeField] private GameObject         losePanel;
+    [SerializeField] private GameObject         winGamePanel;
+    [SerializeField] private GameObject         successVfx;
+    [SerializeField] private List<GameObject>   objTurnOff;
+    private const string                        SelectedButtonKey = "SelectedButtonIndex"; 
+    public static GameManager                   Instance;
+    [SerializeField] private int                _coinAmount = -1;
+    [SerializeField] private Text               coinTxt;
+    public bool                                 canSelectChar;
+    [SerializeField] private Image              fill;
+    [SerializeField] private Text               percent;
+    [SerializeField] private GameObject         giftPanel;
+    [SerializeField] private GameObject         giftEffect;
     private void Awake()
     {
         if (Instance == null)
@@ -35,6 +44,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        canSelectChar = true;
         Time.timeScale = 1;
         isMuted = PlayerPrefs.GetInt("isMuted", 0) == 1;
         if (_musicButtons.Count != 0)
@@ -61,6 +71,19 @@ public class GameManager : MonoBehaviour
                 _bgButtons[i].onClick.AddListener(() => OnBackgroundButtonClick(index));
                 // _bgButtons[i].onClick.AddListener(() => ChangeIndexBG(index));
             }
+        }
+        _coinAmount = PlayerPrefs.GetInt("CoinAmount",0);
+        if(coinTxt!=null){
+            coinTxt.text = _coinAmount.ToString();
+        }
+        // if(fill!= null){
+        //     int currentSceneIndex = SceneManager.GetActiveScene().buildIndex - 3;
+        //     fill.fillAmount = 0.25f * (currentSceneIndex % 4) - 0.25f; 
+        // }
+    }
+    private void Update() {
+        if(Input.GetKeyDown(KeyCode.Space)){
+            StartCoroutine(GiftCroutine());
         }
     }
 
@@ -150,7 +173,37 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 0;
     }
-
+    public void BuyRandomChar(){
+        if(_coinAmount >= 100){
+            canSelectChar = false;
+            CharactorManager.Instance.ActivateRandomCharactor();
+        }
+    }
+    public void BuySelectChar(){
+        if(CharactorManager.Instance.canSelectBox){
+            CharactorManager.Instance.canSelectBox = false;
+            canSelectChar = true;
+            CharactorManager.Instance.UnActiveSelectEffect();
+            return;
+        }
+        if(_coinAmount >= 150){
+            CharactorManager.Instance.ActiveSelectEffect();
+            canSelectChar = false;
+            CharactorManager.Instance.canSelectBox = true;
+        }
+    }
+    public void DecreaseCoin(int amount){
+        _coinAmount -= amount;
+        PlayerPrefs.SetInt("CoinAmount",_coinAmount);
+        PlayerPrefs.Save();
+        coinTxt.text = _coinAmount.ToString();
+    }
+    public void BuyEffect(){
+        foreach (Image item in backgroundPanel)
+        {
+            item.color = new Color(120/255,120/255,120/255,213/255);
+        }
+    }
     public void ResumeGame()
     {
         Time.timeScale = 1;
@@ -160,19 +213,24 @@ public class GameManager : MonoBehaviour
     }
     public IEnumerator ActiveSuccessPanel(){
         // AudioManager.Instance.PlayAudioSuccess();
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1f);
+        successVfx.SetActive(true);
+        yield return new WaitForSeconds(.1f);
+        foreach(GameObject obj in objTurnOff){
+            obj.SetActive(false);
+        }
+        yield return new WaitForSeconds(2.5f);
         sucessPanel.SetActive(true);
-        Time.timeScale =0;
+        StartCoroutine(UpdateFillAndPercent());
     }
     public IEnumerator ActiveWinPanel(){
         // AudioManager.Instance.TurnOffAudioSource();
         yield return new WaitForSeconds(0.5f);
         // AudioManager.Instance.PlaySFXWin();
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(3f);
         winGamePanel.SetActive(true);
         // Time.timeScale =0;
     }
-
     public IEnumerator ActiveLosePanel(){
         yield return new WaitForSeconds(2f);
         // AudioManager.Instance.TurnOffAudioSource();
@@ -180,4 +238,55 @@ public class GameManager : MonoBehaviour
         losePanel.SetActive(true);
         // Time.timeScale =0;
     }
+    private void UpdateCoinTxt(){
+        coinTxt.text = _coinAmount.ToString();
+        PlayerPrefs.SetInt("CoinAmount",_coinAmount);
+        PlayerPrefs.Save();
+    }
+    public void IncreaseCoin(int x){
+        _coinAmount+=x;
+        UpdateCoinTxt();
+
+    } 
+    public IEnumerator UpdateFillAndPercent()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex - 3;
+        int step = (currentSceneIndex % 4) + 1; 
+        float targetFill = 0.25f * step; 
+        int targetPercent = Mathf.RoundToInt(targetFill * 100); 
+        float currentFill = Mathf.Max(targetFill - 0.25f, 0); 
+        int currentPercent = Mathf.Max(targetPercent - 25, 0); 
+        float duration = 1.5f; 
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            fill.fillAmount = Mathf.Lerp(currentFill, targetFill, t);
+            int displayPercent = Mathf.RoundToInt(Mathf.Lerp(currentPercent, targetPercent, t));
+            percent.text = displayPercent + "%";
+            yield return null;
+        }
+        fill.fillAmount = targetFill;
+        percent.text = targetPercent + "%";
+        if (targetPercent == 100){
+            yield return new WaitForSeconds(0.1f);
+            StartCoroutine(GiftCroutine());
+        }
+    }
+
+    public IEnumerator GiftCroutine(){
+        foreach(GameObject obj in objTurnOff){
+            obj.SetActive(false);
+        }
+        sucessPanel.SetActive(false);
+        CharactorManager.Instance.UnActiveWordBox();
+        giftPanel.SetActive(true);
+        giftPanel.GetComponent<Animator>().SetTrigger("Gift");
+        yield return new WaitForSeconds(4f);
+        giftEffect.SetActive(true);
+        yield return new WaitForSeconds(2.5f);
+        IncreaseCoin(100);
+    }
+
 }

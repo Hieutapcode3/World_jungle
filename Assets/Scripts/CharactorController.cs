@@ -7,17 +7,22 @@ public class CharactorController : MonoBehaviour
 {
     [SerializeField] private char _char; 
     private TextMeshPro _txt;
+    private GameObject circle;
 
     void Start()
     {
+        circle = transform.GetChild(0).gameObject;
         _txt = GetComponent<TextMeshPro>();
         _char = _txt.text[0];
     }
 
     private void OnMouseDown()
     {
-        Debug.Log("Mouse Down on: " + _char);
-        CharactorManager.Instance.StartTracking(_char, transform); 
+        if (GameManager.Instance.canSelectChar)
+        {
+            circle.SetActive(true); 
+            CharactorManager.Instance.StartTracking(_char, transform); 
+        }
     }
 
     private void OnMouseEnter()
@@ -25,12 +30,13 @@ public class CharactorController : MonoBehaviour
         if (CharactorManager.Instance.IsTracking)
         {
             CharactorManager.Instance.AddChar(_char, transform); 
+            circle.SetActive(true); 
         }
     }
 
     private void OnMouseUp()
     {
-        Debug.Log("Mouse Up on: " + _char);
+        circle.SetActive(false); 
         CharactorManager.Instance.EndTracking();
     }
 }
