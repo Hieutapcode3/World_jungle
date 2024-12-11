@@ -56,7 +56,8 @@ public class GameManager : MonoBehaviour
             }
         }
         if(backgroundPanel.Count!=0){
-            int selectedButtonIndex = PlayerPrefs.GetInt(SelectedButtonKey, -1);
+            int selectedButtonIndex = PlayerPrefs.GetInt(SelectedButtonKey, 0);
+            Debug.Log(selectedButtonIndex);
             if(_bgIndexTxt!=null){
                 ChangeIndexBG(selectedButtonIndex);
             }
@@ -69,17 +70,12 @@ public class GameManager : MonoBehaviour
             {
                 int index = i; 
                 _bgButtons[i].onClick.AddListener(() => OnBackgroundButtonClick(index));
-                // _bgButtons[i].onClick.AddListener(() => ChangeIndexBG(index));
             }
         }
         _coinAmount = PlayerPrefs.GetInt("CoinAmount",0);
         if(coinTxt!=null){
             coinTxt.text = _coinAmount.ToString();
         }
-        // if(fill!= null){
-        //     int currentSceneIndex = SceneManager.GetActiveScene().buildIndex - 3;
-        //     fill.fillAmount = 0.25f * (currentSceneIndex % 4) - 0.25f; 
-        // }
     }
     private void Update() {
         if(Input.GetKeyDown(KeyCode.Space)){

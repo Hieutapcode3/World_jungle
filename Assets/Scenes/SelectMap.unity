@@ -1527,7 +1527,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minMaxDisplacement:
-    min: -600
+    min: -1000
     max: 600
   minMaxValue:
     min: -30
@@ -1578,7 +1578,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minMaxDisplacement:
-    min: -600
+    min: -1000
     max: 600
   minMaxValue:
     min: 0.5
@@ -1629,7 +1629,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minMaxDisplacement:
-    min: -600
+    min: -1000
     max: 600
   minMaxValue:
     min: 0
@@ -1701,8 +1701,6 @@ MonoBehaviour:
   isMuted: 0
   isStart: 0
   _bgIndexTxt: {fileID: 2063056453}
-  _previousBtn: {fileID: 2104371876}
-  _nextBtn: {fileID: 779269069}
   _musicButtons: []
   _bgButtons:
   - {fileID: 827820279}
