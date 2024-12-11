@@ -21,6 +21,7 @@ public class CharactorController : MonoBehaviour
         if (GameManager.Instance.canSelectChar)
         {
             circle.SetActive(true); 
+            AudioManager.Instance.PlayAudioClick();
             CharactorManager.Instance.StartTracking(_char, transform); 
         }
     }

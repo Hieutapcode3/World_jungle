@@ -57,7 +57,6 @@ public class GameManager : MonoBehaviour
         }
         if(backgroundPanel.Count!=0){
             int selectedButtonIndex = PlayerPrefs.GetInt(SelectedButtonKey, 0);
-            Debug.Log(selectedButtonIndex);
             if(_bgIndexTxt!=null){
                 ChangeIndexBG(selectedButtonIndex);
             }
@@ -162,7 +161,7 @@ public class GameManager : MonoBehaviour
 
     public void BackToStartGame()
     {
-        SceneManager.LoadScene("StartScene");
+        SceneManager.LoadScene("SelectMap");
     }
 
     public void PauseGame()
@@ -215,6 +214,7 @@ public class GameManager : MonoBehaviour
         foreach(GameObject obj in objTurnOff){
             obj.SetActive(false);
         }
+        AudioManager.Instance.PlayAudioSuccessGame();
         yield return new WaitForSeconds(2.5f);
         sucessPanel.SetActive(true);
         StartCoroutine(UpdateFillAndPercent());
@@ -246,7 +246,7 @@ public class GameManager : MonoBehaviour
     } 
     public IEnumerator UpdateFillAndPercent()
     {
-        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex - 3;
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         int step = (currentSceneIndex % 4) + 1; 
         float targetFill = 0.25f * step; 
         int targetPercent = Mathf.RoundToInt(targetFill * 100); 

@@ -74,13 +74,12 @@ public class CharactorManager : MonoBehaviour
     public void AddChar(char nextChar, Transform nextPosition)
     {
         if (!isTracking) return;
-
+        AudioManager.Instance.PlayAudioClick();
         if (charPositions.Count > 1 && nextPosition == charPositions[charPositions.Count - 2])
         {
             int lastIndex = charPositions.Count - 1;
             charControllers[lastIndex].transform.GetChild(0).gameObject.SetActive(false);
             charControllers.RemoveAt(lastIndex);
-
             currentChars.RemoveAt(lastIndex);
             charPositions.RemoveAt(lastIndex);
         }
@@ -91,7 +90,6 @@ public class CharactorManager : MonoBehaviour
             charControllers.Add(nextPosition.GetComponent<CharactorController>()); // Lấy CharactorController.
             nextPosition.GetChild(0).gameObject.SetActive(true);
         }
-
         UpdateWord();
         UpdateLineRenderer();
     }
@@ -138,7 +136,7 @@ public class CharactorManager : MonoBehaviour
                     correctWordAmount++;
                     if(correctWordAmount == keyWords.Count){
                         GameManager.Instance.Success();
-                        // LevelManager.Instance.UnlockNextLevel();
+                        LevelManager.Instance.UnlockNextLevel();
                     }
                 }
             }
@@ -180,6 +178,7 @@ public class CharactorManager : MonoBehaviour
 
     private IEnumerator CharactorEffectWord(KeyWord keyWord){
         foreach (GameObject charactor in keyWord.charatorOfKeyWord){
+            AudioManager.Instance.PlayAudioCollect();
             charactor.transform.localScale = Vector3.zero;
             charactor.SetActive(true);
             TextMeshPro _color = charactor.GetComponent<TextMeshPro>();
@@ -268,6 +267,7 @@ public class CharactorManager : MonoBehaviour
                 StartCoroutine(CharactorEffectWord(keyword));
                 if (correctWordAmount == keyWords.Count)
                 {
+                    LevelManager.Instance.UnlockNextLevel();
                     GameManager.Instance.Success();
                 }
             }

@@ -3,89 +3,104 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Hyb.Utils;
+
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField] private List<Button> levelBtn;
+    [SerializeField] private List<Button> levelBtn; 
     [SerializeField] private Sprite lockedSprite;
     [SerializeField] private Sprite unlockedSprite;
-    
-    private List<bool> levelUnlocked = new List<bool>();
+    private List<bool> levelUnlocked = new List<bool>(); 
     public static LevelManager Instance;
+    private const int TotalLevels = 20; 
     private void Awake() {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this);
-        }
-    } 
+        Instance = this;
+    }
     void Start()
     {
-        LoadLevelStatus();
-        levelUnlocked[0] = true;
-        UpdateButtonGraphics();
-        // ResetLevels();
-    }
-    private void LoadLevelStatus()
-    {
-        for (int i = 0; i < levelBtn.Count; i++)
+        InitializeLevels();
+        if (levelBtn != null && levelBtn.Count > 0)
         {
-            levelUnlocked.Add(PlayerPrefs.GetInt("Level_" + i, 0) == 1);
+            UpdateButtonGraphics();
         }
     }
+
+    private void InitializeLevels()
+    {
+        for (int i = 0; i < TotalLevels; i++)
+        {
+            bool isUnlocked = PlayerPrefs.GetInt("Level_" + i, i == 0 ? 1 : 0) == 1;
+            levelUnlocked.Add(isUnlocked);
+        }
+    }
+
     private void UpdateButtonGraphics()
     {
+        if (levelBtn == null || levelBtn.Count == 0) return; 
+
         for (int i = 0; i < levelBtn.Count; i++)
         {
             levelBtn[i].image.sprite = levelUnlocked[i] ? unlockedSprite : lockedSprite;
-            int levelIndex = i;  
+            int levelIndex = i; 
+            levelBtn[i].onClick.RemoveAllListeners(); 
             levelBtn[i].onClick.AddListener(() => PlayLevel(levelIndex));
         }
     }
+
     public void UnlockNextLevel()
     {
-        int currentLevel = SceneManager.GetActiveScene().buildIndex - 2; 
-        if (currentLevel + 1 < levelBtn.Count)
+        int currentLevel = SceneManager.GetActiveScene().buildIndex; 
+        Debug.Log(currentLevel);
+        int nextLevel = currentLevel + 1;
+
+        if (nextLevel < TotalLevels)
         {
-            levelUnlocked[currentLevel + 1] = true;
-            Debug.Log("Unlock level" + (currentLevel + 1));
-            PlayerPrefs.SetInt("Level_" + (currentLevel + 1), 1);
+            levelUnlocked[nextLevel] = true;
+            PlayerPrefs.SetInt("Level_" + nextLevel, 1); 
             PlayerPrefs.Save();
+            Debug.Log("Unlocked Level " + nextLevel);
         }
     }
+
     public void PlayLevel(int levelIndex)
     {
-        int sceneIndex = levelIndex + 3; 
         if (levelIndex < levelUnlocked.Count && levelUnlocked[levelIndex])
         {
-            SceneManager.LoadScene(sceneIndex);
+            SceneManager.LoadScene(levelIndex); 
+        }
+        else
+        {
+            Debug.Log("Level " + levelIndex + " is locked!");
         }
     }
+
     public void ResetLevels()
     {
-        for (int i = 0; i < levelBtn.Count; i++)
+        for (int i = 0; i < TotalLevels; i++)
         {
             PlayerPrefs.DeleteKey("Level_" + i);
         }
         PlayerPrefs.Save();
+
         levelUnlocked.Clear();
-        for (int i = 0; i < levelBtn.Count; i++)
+        for (int i = 0; i < TotalLevels; i++)
         {
-            if (i == 0)
-            {
-                levelUnlocked.Add(true);
-                PlayerPrefs.SetInt("Level_0", 1); 
-            }
-            else
-            {
-                levelUnlocked.Add(false); 
-            }
+            levelUnlocked.Add(i == 0); 
+            PlayerPrefs.SetInt("Level_" + i, i == 0 ? 1 : 0);
         }
         PlayerPrefs.Save();
-        UpdateButtonGraphics();
+
+        if (levelBtn != null && levelBtn.Count > 0)
+        {
+            UpdateButtonGraphics();
+        }
     }
 
+    public void LoadLevelButtons(List<Button> buttons)
+    {
+        levelBtn = buttons;
+        if (levelBtn != null && levelBtn.Count > 0)
+        {
+            UpdateButtonGraphics();
+        }
+    }
 }

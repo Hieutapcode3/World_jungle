@@ -7,6 +7,7 @@ public class CoinBox : MonoBehaviour
     [SerializeField] private GameObject coinPref;
     private void OnTriggerEnter2D(Collider2D other) {
         if(other.gameObject.CompareTag("Char")){
+            AudioManager.Instance.PlayAudioCoin();
             GameObject coin =  Instantiate(coinPref,this.transform.position,Quaternion.identity);
             coin.GetComponent<CoinEff>().SetText(10);
             Destroy(this.gameObject);
